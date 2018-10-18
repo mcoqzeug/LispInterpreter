@@ -1,16 +1,20 @@
-public class Node {
-    public String value;
-    public Node left;
-    public Node right;
+class Node {
+    String identifier;
+    int integer;
+    Node left;
+    Node right;
 
-    public Node() { }
+//    Node() { }
 
-    public Node(String value) {
-        this.value = value;
+    Node(int value) {
+        this.integer = value;
     }
 
-    public Node(String value, Node left, Node right) {
-        this.value = value;
+    Node(String value) {
+        this.identifier = value;
+    }
+
+    Node(Node left, Node right) {
         this.left = left;
         this.right = right;
     }

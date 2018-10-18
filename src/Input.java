@@ -3,43 +3,50 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Input {
-    String fileString;
-    String nextFileString;
-    static final int LEFT_PARENTHESIS = 0;
-    static final int RIGHT_PARENTHESIS = 1;
-    static final int DOT = 2;
-//    static final int SPACE = 3;
-    static final int IDENTIFIER = 4;
-    static final int INTEGER = 5;
-    static final int END_EXPRESSION = 6;
-//    static final int END_FILE = 7;
+class Input {
+    private String sExpressionString;
+    private String nextSExpressionString;
+    private ArrayList<String> sExpressions = new ArrayList<>();
+    private int sExpressionCount = 0;
 
-    static final Pattern pattern = Pattern.compile("\\s*([(.)]|[^\\s(.)]*)(.*)");
+    private static final int LEFT_PARENTHESIS = 0;
+    private static final int RIGHT_PARENTHESIS = 1;
+    private static final int DOT = 2;
+    private static final int IDENTIFIER = 3;
+    private static final int INTEGER = 4;
 
-    public Input(String filename) {
-        this.fileString = readFile(filename);
-        this.nextFileString = fileString;
+    private static final Pattern pattern = Pattern.compile("\\s*([(.)]|[^\\s(.)]*)(.*)");
+
+    Input(String filename) {
+        readFile(filename);
     }
 
-    public String readFile(String filename) {
-        String fileString = "";
+    private void readFile(String filename) {
         try {
             FileInputStream fStream = new FileInputStream(filename);  // Open the file
             BufferedReader br = new BufferedReader(new InputStreamReader(fStream));
 
             StringBuilder fileStringBuilder = new StringBuilder();
-            String line = "";
+            String line;
 
             while ((line = br.readLine()) != null) {
                 if (line.equals(""))
                     continue;
 
-                fileStringBuilder.append(line);
-            }
+                if (line.equals("$") || line.equals("$$")) {
+                    String tmp = fileStringBuilder.toString();
+                    tmp = tmp.trim().replaceAll(" +", " ");  // remove consecutive spaces
+                    sExpressions.add(tmp);
+                    fileStringBuilder = new StringBuilder();
 
-            fileString = fileStringBuilder.toString();
-            fileString = fileString.trim().replaceAll(" +", " ");  // remove consecutive spaces
+                    if (line.equals("$$"))
+                        break;
+                }
+                else {
+                    line = " " + line;
+                    fileStringBuilder.append(line);
+                }
+            }
 
             br.close();  //Close the input stream
 
@@ -48,78 +55,129 @@ public class Input {
         } catch (IOException ex) {
             System.err.println("An IOException was caught: " + ex.getMessage());
         }
-
-        return fileString;
     }
 
-    public Node input() {
-        String token = getNextToken();
-        int tokenType = checkToken(token);
-        if (tokenType == IDENTIFIER || tokenType == INTEGER) {
-            skipToken();
-            return getId(token);
-        } else if (tokenType == LEFT_PARENTHESIS) {
-            skipToken();
-            Node left = input();
-            int nextTokenType = checkToken(getNextToken());
-            if (nextTokenType != DOT) {
-                if (nextTokenType == IDENTIFIER || nextTokenType == INTEGER || nextTokenType == RIGHT_PARENTHESIS) {
-                    // list notation
-                    skipToken();
-                    return inputList();
+    ArrayList<String> getOutputs() {
+        ArrayList<String> outputStrings = new ArrayList<>();
+        String outputStr;
+
+        while (sExpressionCount < sExpressions.size()) {
+            sExpressionString = sExpressions.get(sExpressionCount);
+
+            if (getTokenType(getToken()) == LEFT_PARENTHESIS) {
+                Node sExpression = input();
+                if (sExpression != null) {  // there's no error
+                    outputStr = Output.generateOutput(sExpression);
+                    outputStrings.add(outputStr);
+                } else {
+                    outputStrings.add("some error");
                 }
-                // error
-                System.out.println("ERROR: syntax error.");
-                return null;
             } else {
-                skipToken();
-                return Eval.cons(left, input());
+                System.out.println("ERROR: s-expression should start with \"(\"");
             }
+
+            sExpressionCount++;
         }
 
-        // in dot notation, a left parenthesis can only be followed by
-        // another left parenthesis or an identifier. anything else would
+        return outputStrings;
+    }
+
+    private Node input() {
+        String token = getToken();
+        int tokenType = getTokenType(token);
+
+        if (tokenType == INTEGER) {
+            skipToken();
+            return getInt(token);
+        }
+
+        if (tokenType == IDENTIFIER ) {
+            skipToken();
+            return getId(token);
+        }
+
+        if (tokenType == LEFT_PARENTHESIS) {
+            skipToken();  // skip "("
+
+            Node left = input();
+
+            if (left == null)
+                return null;
+
+            int nextTokenType = getTokenType(getToken());
+
+            if (nextTokenType != DOT) {  // list notation
+                return Eval.cons(left, inputList());
+            }
+
+            skipToken();  // skip dot
+            Node right = input();
+
+            if (right == null)
+                return null;
+
+            // the input() above should bring us to the final ")"
+            nextTokenType = getTokenType(getToken());
+            if (nextTokenType != RIGHT_PARENTHESIS) {
+                System.out.println("ERROR: Expect \")\"");
+                return null;
+            }
+
+            skipToken();  // skip the final ")"
+            return Eval.cons(left, right);  // this should return to the original call of input
+                                            // if the current sExpression is legal
+        }
+
+        // In dot notation, a "(" can only be followed by
+        // another "(" or an identifier. Anything else would
         // be an error.
-        System.out.println("ERROR: syntax error.");
+        System.out.println(String.format("ERROR: Token %s appears in the wrong place.", token));
         return null;
     }
 
-    public Node inputList() {
-        String token = getNextToken();
-        int tokenType = checkToken(token);
-        skipToken();
-        if (tokenType == RIGHT_PARENTHESIS)
+    private Node inputList() {
+        // When inputList() is called,
+        // some input() must have seen a "(".
+
+        String token = getToken();
+        int tokenType = getTokenType(token);
+
+        if (tokenType == RIGHT_PARENTHESIS) {
+            skipToken();
             return Eval.NIL;
-        return Eval.cons(input(), inputList());
+        }
+
+        // tokenType = INTEGER, IDENTIFIER, or LEFT_PARENTHESIS, don't skip, let input() do the skipping
+        Node left = input();
+
+        if (left == null)
+            return null;
+
+        Node right = inputList();
+
+        if (right == null)
+            return null;
+
+        return Eval.cons(left, right);  // Would either return to this line or
     }
 
-    void skipToken() {
-        fileString = nextFileString;
+    private void skipToken() {
+        sExpressionString = nextSExpressionString;
+//        getToken();
     }
 
-    public String getNextToken() {
-        Matcher matcher = pattern.matcher(fileString);
+    private String getToken() {
+        Matcher matcher = pattern.matcher(sExpressionString);
         if (matcher.find()) {
-            nextFileString = matcher.group(2);
+            nextSExpressionString = matcher.group(2);
             return matcher.group(1);
         }
         return "";
     }
 
-    public Node getId(String token) {
-        if (Eval.ids.containsKey(token)) {
-            return Eval.ids.get(token);
-        }
-        return Eval.addID(token);
-    }
-
-    public boolean checkValidity(String sExpressionStr) {
-        return true;
-    }
-
-    public int checkToken(String token) {
+    private int getTokenType(String token) {
         if (isInteger(token)) {
-            return IDENTIFIER;
+            return INTEGER;
         }
 
         switch (token) {
@@ -129,14 +187,46 @@ public class Input {
                 return RIGHT_PARENTHESIS;
             case ".":
                 return DOT;
-            case "$":
-                return END_EXPRESSION;
             default:
                 return IDENTIFIER;
         }
     }
 
-    public boolean isInteger(String str) {
+    private Node getId(String token) {
+        if (!isIdValid(token)) {
+            System.out.println(String.format("ERROR: invalid character in identifier %s.", token));
+            return null;
+        }
+
+        if (Eval.ids.containsKey(token))
+            return Eval.ids.get(token);
+
+        return Eval.addID(token);
+    }
+
+    private Node getInt(String token) {
+        int integer = Integer.parseInt(token);
+        return new Node(integer);
+    }
+
+    private boolean isIdValid(String token) {
+        char c = token.charAt(0);
+
+        if (c < 'A' || c > 'Z') {
+            return false;
+        }
+
+        for (int i=1; i<token.length(); i++) {
+            c = token.charAt(i);
+            if ((c < 'A' || c > 'Z') && (c < '0' || c > '9')) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isInteger(String str) {
         int length = str.length();
 
         if (str.isEmpty()) {
@@ -158,4 +248,5 @@ public class Input {
         }
         return true;
     }
+
 }
