@@ -14,24 +14,27 @@ class Test {
     static void testCorrectness() {
         String filename = "input.txt";
         Input input = new Input(filename);
-        ArrayList<String> outputStrings = input.getOutputs();
-        ArrayList<String> expectedOutputStrings = readFile("expected_output.txt");
 
-        String out;
-        String expected;
 
-        for (int i=0; i<outputStrings.size(); i++) {
-            out = outputStrings.get(i);
-            out = out.replaceAll("\\s+","");
-            expected = expectedOutputStrings.get(i);
-            expected = expected.replaceAll("\\s+","");
-            if (!out.equals(expected)) {
-                System.out.println("Bad");
-                System.out.println(out);
-                System.out.println(expected);
-                System.out.println();
-            }
-        }
+
+//        ArrayList<String> outputStrings = input.getOutputNodes();
+//        ArrayList<String> expectedOutputStrings = readFile("expected_output.txt");
+//
+//        String out;
+//        String expected;
+//
+//        for (int i=0; i<outputStrings.size(); i++) {
+//            out = outputStrings.get(i);
+//            out = out.replaceAll("\\s+","");
+//            expected = expectedOutputStrings.get(i);
+//            expected = expected.replaceAll("\\s+","");
+//            if (!out.equals(expected)) {
+//                System.out.println("Bad");
+//                System.out.println(out);
+//                System.out.println(expected);
+//                System.out.println();
+//            }
+//        }
     }
 
     private static ArrayList<String> readFile(String filename) {

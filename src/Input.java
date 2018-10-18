@@ -34,9 +34,19 @@ class Input {
                     continue;
 
                 if (line.equals("$") || line.equals("$$")) {
-                    String tmp = fileStringBuilder.toString();
-                    tmp = tmp.trim().replaceAll(" +", " ");  // remove consecutive spaces
-                    sExpressions.add(tmp);
+
+                    // initialize sExpressionString
+                    String sExpressionString = fileStringBuilder.toString();
+                    sExpressionString = sExpressionString.trim().replaceAll(" +", " ");  // remove consecutive spaces
+
+                    Node sExpression = input();
+
+                    if (sExpression.errorMsg == null) {
+                        System.out.println(Output.generateOutput(sExpression));
+                    } else {
+                        System.out.println(sExpression.errorMsg);
+                    }
+
                     fileStringBuilder = new StringBuilder();
 
                     if (line.equals("$$"))
@@ -57,30 +67,30 @@ class Input {
         }
     }
 
-    ArrayList<String> getOutputs() {
-        ArrayList<String> outputStrings = new ArrayList<>();
-        String outputStr;
-
-        while (sExpressionCount < sExpressions.size()) {
-            sExpressionString = sExpressions.get(sExpressionCount);
-
-            if (getTokenType(getToken()) == LEFT_PARENTHESIS) {
-                Node sExpression = input();
-                if (sExpression != null) {  // there's no error
-                    outputStr = Output.generateOutput(sExpression);
-                    outputStrings.add(outputStr);
-                } else {
-                    outputStrings.add("some error");
-                }
-            } else {
-                System.out.println("ERROR: s-expression should start with \"(\"");
-            }
-
-            sExpressionCount++;
-        }
-
-        return outputStrings;
-    }
+//    ArrayList<String> getOutputs() {
+//        ArrayList<String> outputStrings = new ArrayList<>();
+//        String outputStr;
+//
+//        while (sExpressionCount < sExpressions.size()) {
+//            sExpressionString = sExpressions.get(sExpressionCount);
+//
+//            if (getTokenType(getToken()) == LEFT_PARENTHESIS) {
+//                Node sExpression = input();
+//                if (sExpression != null) {  // there's no error
+//                    outputStr = Output.generateOutput(sExpression);
+//                    outputStrings.add(outputStr);
+//                } else {
+//                    outputStrings.add("some error");
+//                }
+//            } else {
+//                System.out.println("ERROR: s-expression should start with \"(\"");
+//            }
+//
+//            sExpressionCount++;
+//        }
+//
+//        return outputStrings;
+//    }
 
     private Node input() {
         String token = getToken();
@@ -101,8 +111,8 @@ class Input {
 
             Node left = input();
 
-            if (left == null)
-                return null;
+            if (left.errorMsg != null)
+                return left;
 
             int nextTokenType = getTokenType(getToken());
 
@@ -113,14 +123,15 @@ class Input {
             skipToken();  // skip dot
             Node right = input();
 
-            if (right == null)
-                return null;
+            if (right.errorMsg != null)
+                return right;
 
             // the input() above should bring us to the final ")"
             nextTokenType = getTokenType(getToken());
             if (nextTokenType != RIGHT_PARENTHESIS) {
-                System.out.println("ERROR: Expect \")\"");
-                return null;
+                Node node = new Node();
+                node.errorMsg = "ERROR: Expect \")\"";
+                return node;
             }
 
             skipToken();  // skip the final ")"
@@ -131,8 +142,9 @@ class Input {
         // In dot notation, a "(" can only be followed by
         // another "(" or an identifier. Anything else would
         // be an error.
-        System.out.println(String.format("ERROR: Token %s appears in the wrong place.", token));
-        return null;
+        Node node = new Node();
+        node.errorMsg = String.format("ERROR: Token %s appears in the wrong place.", token);
+        return node;
     }
 
     private Node inputList() {
@@ -150,13 +162,13 @@ class Input {
         // tokenType = INTEGER, IDENTIFIER, or LEFT_PARENTHESIS, don't skip, let input() do the skipping
         Node left = input();
 
-        if (left == null)
-            return null;
+        if (left.errorMsg != null)
+            return left;
 
         Node right = inputList();
 
-        if (right == null)
-            return null;
+        if (right.errorMsg != null)
+            return right;
 
         return Eval.cons(left, right);  // Would either return to this line or
     }
@@ -194,8 +206,9 @@ class Input {
 
     private Node getId(String token) {
         if (!isIdValid(token)) {
-            System.out.println(String.format("ERROR: invalid character in identifier %s.", token));
-            return null;
+            Node node = new Node();
+            node.errorMsg = String.format("ERROR: invalid character in identifier %s.", token);
+            return node;
         }
 
         if (Eval.ids.containsKey(token))
