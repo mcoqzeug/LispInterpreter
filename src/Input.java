@@ -4,47 +4,42 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Input {
+    String fileString;
+    String nextFileString;
+    static final int LEFT_PARENTHESIS = 0;
+    static final int RIGHT_PARENTHESIS = 1;
+    static final int DOT = 2;
+//    static final int SPACE = 3;
+    static final int IDENTIFIER = 4;
+    static final int INTEGER = 5;
+    static final int END_EXPRESSION = 6;
+//    static final int END_FILE = 7;
+
+    static final Pattern pattern = Pattern.compile("\\s*([(.)]|[^\\s(.)]*)(.*)");
+
     public Input(String filename) {
-        ArrayList<String> sExpressionList = new ArrayList<>();
-        sExpressionList = readFile(filename);
-        System.out.println(sExpressionList);
+        this.fileString = readFile(filename);
+        this.nextFileString = fileString;
     }
 
-    /*
-    * Read File Line By Line and convert them to a list of SExpressions.
-    * */
-    private ArrayList readFile(String filename) {
-        ArrayList<String> sExpressionList = new ArrayList<>();
-
+    public String readFile(String filename) {
+        String fileString = "";
         try {
             FileInputStream fStream = new FileInputStream(filename);  // Open the file
             BufferedReader br = new BufferedReader(new InputStreamReader(fStream));
 
-            StringBuilder sExpression = new StringBuilder();
-            String sExpressionStr;
+            StringBuilder fileStringBuilder = new StringBuilder();
+            String line = "";
 
-            for (String nextLine, line = br.readLine(); line != null; line = nextLine) {
-                nextLine = br.readLine();
+            while ((line = br.readLine()) != null) {
+                if (line.equals(""))
+                    continue;
 
-                // process the input line
-                if (line.equals("$") || line.equals("$$")) {
-                    sExpressionStr = sExpression.toString();
-                    sExpressionList.add(sExpressionStr);
-                    sExpression = new StringBuilder();  // reset to empty
-                } else {
-                    sExpression.append(line);
-                }
-
-                // check if "$$" is at the end of the input file
-                if (line.equals("$$")) {
-                    if (nextLine != null)
-                        System.out.println("ERROR: \"$$\" is not at the end.");
-                    break;
-                } else {
-                    if (nextLine == null)
-                        System.out.println("ERROR: \"$$\" is not at the end.");
-                }
+                fileStringBuilder.append(line);
             }
+
+            fileString = fileStringBuilder.toString();
+            fileString = fileString.trim().replaceAll(" +", " ");  // remove consecutive spaces
 
             br.close();  //Close the input stream
 
@@ -54,27 +49,113 @@ public class Input {
             System.err.println("An IOException was caught: " + ex.getMessage());
         }
 
-        return sExpressionList;
+        return fileString;
     }
 
-    private boolean checkValidity(String sExpressionStr) {
-//        StringTokenizer tokenizer = new StringTokenizer(sExpressionStr);
-//        String[] tokens = sExpressionStr.trim().split("\\s+");
-        Pattern pattern = Pattern.compile("\"\\s*(,@|[('`,)]|\"(?:[\\\\].|[^\\\\\"])*\"|;.*|[^\\s('\"`,;)]*)(.*)\"");
-        Matcher matcher = pattern.matcher(sExpressionStr);
-        System.out.println(matcher.group());
-        // sExpressionStr = sExpressionStr.replaceAll("\\s+", " ");  // remove consecutive spaces
-        boolean valid = true;
+    public Node input() {
+        String token = getNextToken();
+        int tokenType = checkToken(token);
+        if (tokenType == IDENTIFIER || tokenType == INTEGER) {
+            skipToken();
+            return getId(token);
+        } else if (tokenType == LEFT_PARENTHESIS) {
+            skipToken();
+            Node left = input();
+            int nextTokenType = checkToken(getNextToken());
+            if (nextTokenType != DOT) {
+                if (nextTokenType == IDENTIFIER || nextTokenType == INTEGER || nextTokenType == RIGHT_PARENTHESIS) {
+                    // list notation
+                    skipToken();
+                    return inputList();
+                }
+                // error
+                System.out.println("ERROR: syntax error.");
+                return null;
+            } else {
+                skipToken();
+                return Eval.cons(left, input());
+            }
+        }
 
-        return valid;
+        // in dot notation, a left parenthesis can only be followed by
+        // another left parenthesis or an identifier. anything else would
+        // be an error.
+        System.out.println("ERROR: syntax error.");
+        return null;
     }
 
-    private String getNextToken(String line) {
+    public Node inputList() {
+        String token = getNextToken();
+        int tokenType = checkToken(token);
+        skipToken();
+        if (tokenType == RIGHT_PARENTHESIS)
+            return Eval.NIL;
+        return Eval.cons(input(), inputList());
+    }
+
+    void skipToken() {
+        fileString = nextFileString;
+    }
+
+    public String getNextToken() {
+        Matcher matcher = pattern.matcher(fileString);
+        if (matcher.find()) {
+            nextFileString = matcher.group(2);
+            return matcher.group(1);
+        }
         return "";
     }
 
-//    private buildTree() {
-//        String token = getNextToken();
-//    }
+    public Node getId(String token) {
+        if (Eval.ids.containsKey(token)) {
+            return Eval.ids.get(token);
+        }
+        return Eval.addID(token);
+    }
 
+    public boolean checkValidity(String sExpressionStr) {
+        return true;
+    }
+
+    public int checkToken(String token) {
+        if (isInteger(token)) {
+            return IDENTIFIER;
+        }
+
+        switch (token) {
+            case "(":
+                return LEFT_PARENTHESIS;
+            case ")":
+                return RIGHT_PARENTHESIS;
+            case ".":
+                return DOT;
+            case "$":
+                return END_EXPRESSION;
+            default:
+                return IDENTIFIER;
+        }
+    }
+
+    public boolean isInteger(String str) {
+        int length = str.length();
+
+        if (str.isEmpty()) {
+            return false;
+        }
+
+        int i = 0;
+
+        if (str.charAt(0) == '-') {
+            if (length == 1)
+                return false;
+            i = 1;
+        }
+
+        for (; i < length; i++) {
+            char c = str.charAt(i);
+            if (c < '0' || c > '9')
+                return false;
+        }
+        return true;
+    }
 }
