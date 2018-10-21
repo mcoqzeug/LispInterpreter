@@ -1,11 +1,10 @@
 class Node {
     String identifier;
-    String errorMsg;
     int integer;
     Node left;
     Node right;
 
-    Node() { }
+//    Node() { }
 
     Node(int value) {
         this.integer = value;

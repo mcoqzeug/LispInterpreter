@@ -6,8 +6,7 @@ import java.util.regex.Pattern;
 class Input {
     private String sExpressionString;
     private String nextSExpressionString;
-    private ArrayList<String> sExpressions = new ArrayList<>();
-    private int sExpressionCount = 0;
+    private String errorMsg = "";
 
     private static final int LEFT_PARENTHESIS = 0;
     private static final int RIGHT_PARENTHESIS = 1;
@@ -26,36 +25,53 @@ class Input {
             FileInputStream fStream = new FileInputStream(filename);  // Open the file
             BufferedReader br = new BufferedReader(new InputStreamReader(fStream));
 
-            StringBuilder fileStringBuilder = new StringBuilder();
+            StringBuilder sExpStrBuilder = new StringBuilder();
+
             String line;
+            String output;
+            Node sExpression;
 
             while ((line = br.readLine()) != null) {
                 if (line.equals(""))
                     continue;
 
-                if (line.equals("$") || line.equals("$$")) {
+                if (line.equals("$")) {
+                    sExpressionString = sExpStrBuilder.toString();
+                    sExpression = input();
 
-                    // initialize sExpressionString
-                    String sExpressionString = fileStringBuilder.toString();
-                    sExpressionString = sExpressionString.trim().replaceAll(" +", " ");  // remove consecutive spaces
-
-                    Node sExpression = input();
-
-                    if (sExpression.errorMsg == null) {
-                        System.out.println(Output.generateOutput(sExpression));
-                    } else {
-                        System.out.println(sExpression.errorMsg);
+                    if (sExpression == null)
+                        System.out.println(errorMsg);
+                    else {
+                        output = Output.generateOutput(sExpression);
+                        System.out.println(output);
                     }
 
-                    fileStringBuilder = new StringBuilder();
+                    sExpStrBuilder = new StringBuilder();
+                    errorMsg = "";
 
-                    if (line.equals("$$"))
-                        break;
+                    continue;
                 }
-                else {
-                    line = " " + line;
-                    fileStringBuilder.append(line);
+
+                if (line.equals("$$")) {
+                    sExpressionString = sExpStrBuilder.toString();
+                    sExpression = input();
+
+                    if (sExpression == null)
+                        System.out.println(errorMsg);
+                    else {
+                        output = Output.generateOutput(sExpression);
+                        System.out.println(output);
+                    }
+
+                    sExpStrBuilder = new StringBuilder();
+                    errorMsg = "";
+
+                    break;
                 }
+
+                line = line.trim().replaceAll("\\s+", " ");  // remove consecutive spaces
+                line = line + " ";  // replace newline with space
+                sExpStrBuilder.append(line);
             }
 
             br.close();  //Close the input stream
@@ -111,8 +127,8 @@ class Input {
 
             Node left = input();
 
-            if (left.errorMsg != null)
-                return left;
+            if (left == null)
+                return null;
 
             int nextTokenType = getTokenType(getToken());
 
@@ -123,15 +139,15 @@ class Input {
             skipToken();  // skip dot
             Node right = input();
 
-            if (right.errorMsg != null)
-                return right;
+            if (right == null)
+                return null;
 
             // the input() above should bring us to the final ")"
-            nextTokenType = getTokenType(getToken());
+            token = getToken();
+            nextTokenType = getTokenType(token);
             if (nextTokenType != RIGHT_PARENTHESIS) {
-                Node node = new Node();
-                node.errorMsg = "ERROR: Expect \")\"";
-                return node;
+                errorMsg += String.format("ERROR: unexpected %s.", token);
+                return null;
             }
 
             skipToken();  // skip the final ")"
@@ -142,9 +158,8 @@ class Input {
         // In dot notation, a "(" can only be followed by
         // another "(" or an identifier. Anything else would
         // be an error.
-        Node node = new Node();
-        node.errorMsg = String.format("ERROR: Token %s appears in the wrong place.", token);
-        return node;
+        errorMsg += String.format("ERROR: unexpected %s.", token);
+        return null;
     }
 
     private Node inputList() {
@@ -162,13 +177,13 @@ class Input {
         // tokenType = INTEGER, IDENTIFIER, or LEFT_PARENTHESIS, don't skip, let input() do the skipping
         Node left = input();
 
-        if (left.errorMsg != null)
-            return left;
+        if (left == null)
+            return null;
 
         Node right = inputList();
 
-        if (right.errorMsg != null)
-            return right;
+        if (right == null)
+            return null;
 
         return Eval.cons(left, right);  // Would either return to this line or
     }
@@ -206,9 +221,8 @@ class Input {
 
     private Node getId(String token) {
         if (!isIdValid(token)) {
-            Node node = new Node();
-            node.errorMsg = String.format("ERROR: invalid character in identifier %s.", token);
-            return node;
+            errorMsg += "ERROR: invalid token";
+            return null;
         }
 
         if (Eval.ids.containsKey(token))
