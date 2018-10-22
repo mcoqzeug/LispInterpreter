@@ -5,7 +5,6 @@ class Input {
     private String sExpressionString;
     private String nextSExpressionString;
     private String errorMsg = "";
-//    private String filename;
 
     private static final int LEFT_PARENTHESIS = 0;
     private static final int RIGHT_PARENTHESIS = 1;
@@ -14,47 +13,6 @@ class Input {
     private static final int INTEGER = 4;
 
     private static final Pattern pattern = Pattern.compile("\\s*([(.)]|[^\\s(.)]*)(.*)");
-
-//    Input(String filename) {
-//        this.filename = filename;
-//    }
-
-//    void readFile() {
-//        try {
-//            FileInputStream fStream = new FileInputStream(filename);  // Open the file
-//            BufferedReader br = new BufferedReader(new InputStreamReader(fStream));
-//
-//            StringBuilder sExpStrBuilder = new StringBuilder();
-//            String line;
-//
-//            while ((line = br.readLine()) != null) {
-//                if (line.equals(""))
-//                    continue;
-//
-//                if (line.equals("$")) {
-//                    buildTreeAndPrint(sExpStrBuilder);
-//                    sExpStrBuilder = new StringBuilder();
-//                    continue;
-//                }
-//
-//                if (line.equals("$$")) {
-//                    buildTreeAndPrint(sExpStrBuilder);
-//                    break;
-//                }
-//
-//                line = line.trim().replaceAll("\\s+", " ");  // remove consecutive spaces
-//                line = line + " ";  // replace newline with space
-//                sExpStrBuilder.append(line);
-//            }
-//
-//            br.close();  //Close the input stream
-//
-//        } catch (FileNotFoundException ex) {
-//            System.err.println("A FileNotFoundException was caught: " + ex.getMessage());
-//        } catch (IOException ex) {
-//            System.err.println("An IOException was caught: " + ex.getMessage());
-//        }
-//    }
 
     void buildTreeAndPrint(StringBuilder sExpStrBuilder) {
         sExpressionString = sExpStrBuilder.toString();
