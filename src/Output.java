@@ -10,7 +10,7 @@ class Output {
                 return node.identifier;
             }
         } else if (node.left == null || node.right == null) {
-            return "ERROR: a node is neither an atom nor a ";
+            return "ERROR: invalid node";
         }
 
         return "(" + generateOutput(node.left) + " . " + generateOutput(node.right) + ")";

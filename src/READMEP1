@@ -1,0 +1,7 @@
+To compile, run:
+    make
+
+To run the interpreter, run:
+    java Interpreter <input_file_name>
+
+For example,

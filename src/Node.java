@@ -4,8 +4,6 @@ class Node {
     Node left;
     Node right;
 
-//    Node() { }
-
     Node(int value) {
         this.integer = value;
     }

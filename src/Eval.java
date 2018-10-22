@@ -19,7 +19,7 @@ class Eval {
     private static final Node COND = new Node("COND");
     private static final Node DEFUN = new Node("DEFUN");
 
-    private static final Map<String, Node> primitives;
+    static final Map<String, Node> primitives;
     static {
         primitives = new HashMap<>();
         primitives.put("NIL", NIL);

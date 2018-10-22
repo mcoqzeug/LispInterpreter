@@ -11,12 +11,12 @@ FILE=
 CLASSES = \
 		Eval.java \
 		Input.java \
-		Main.java \
+		Interpreter.java \
 		Node.java \
 		Output.java \
 		Test.java
 
-MAIN = Main
+MAIN = Interpreter
 
 default: classes
 

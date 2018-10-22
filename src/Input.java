@@ -1,5 +1,3 @@
-import java.io.*;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -7,6 +5,7 @@ class Input {
     private String sExpressionString;
     private String nextSExpressionString;
     private String errorMsg = "";
+//    private String filename;
 
     private static final int LEFT_PARENTHESIS = 0;
     private static final int RIGHT_PARENTHESIS = 1;
@@ -16,97 +15,64 @@ class Input {
 
     private static final Pattern pattern = Pattern.compile("\\s*([(.)]|[^\\s(.)]*)(.*)");
 
-    Input(String filename) {
-        readFile(filename);
-    }
+//    Input(String filename) {
+//        this.filename = filename;
+//    }
 
-    private void readFile(String filename) {
-        try {
-            FileInputStream fStream = new FileInputStream(filename);  // Open the file
-            BufferedReader br = new BufferedReader(new InputStreamReader(fStream));
-
-            StringBuilder sExpStrBuilder = new StringBuilder();
-
-            String line;
-            String output;
-            Node sExpression;
-
-            while ((line = br.readLine()) != null) {
-                if (line.equals(""))
-                    continue;
-
-                if (line.equals("$")) {
-                    sExpressionString = sExpStrBuilder.toString();
-                    sExpression = input();
-
-                    if (sExpression == null)
-                        System.out.println(errorMsg);
-                    else {
-                        output = Output.generateOutput(sExpression);
-                        System.out.println(output);
-                    }
-
-                    sExpStrBuilder = new StringBuilder();
-                    errorMsg = "";
-
-                    continue;
-                }
-
-                if (line.equals("$$")) {
-                    sExpressionString = sExpStrBuilder.toString();
-                    sExpression = input();
-
-                    if (sExpression == null)
-                        System.out.println(errorMsg);
-                    else {
-                        output = Output.generateOutput(sExpression);
-                        System.out.println(output);
-                    }
-
-                    sExpStrBuilder = new StringBuilder();
-                    errorMsg = "";
-
-                    break;
-                }
-
-                line = line.trim().replaceAll("\\s+", " ");  // remove consecutive spaces
-                line = line + " ";  // replace newline with space
-                sExpStrBuilder.append(line);
-            }
-
-            br.close();  //Close the input stream
-
-        } catch (FileNotFoundException ex) {
-            System.err.println("A FileNotFoundException was caught: " + ex.getMessage());
-        } catch (IOException ex) {
-            System.err.println("An IOException was caught: " + ex.getMessage());
-        }
-    }
-
-//    ArrayList<String> getOutputs() {
-//        ArrayList<String> outputStrings = new ArrayList<>();
-//        String outputStr;
+//    void readFile() {
+//        try {
+//            FileInputStream fStream = new FileInputStream(filename);  // Open the file
+//            BufferedReader br = new BufferedReader(new InputStreamReader(fStream));
 //
-//        while (sExpressionCount < sExpressions.size()) {
-//            sExpressionString = sExpressions.get(sExpressionCount);
+//            StringBuilder sExpStrBuilder = new StringBuilder();
+//            String line;
 //
-//            if (getTokenType(getToken()) == LEFT_PARENTHESIS) {
-//                Node sExpression = input();
-//                if (sExpression != null) {  // there's no error
-//                    outputStr = Output.generateOutput(sExpression);
-//                    outputStrings.add(outputStr);
-//                } else {
-//                    outputStrings.add("some error");
+//            while ((line = br.readLine()) != null) {
+//                if (line.equals(""))
+//                    continue;
+//
+//                if (line.equals("$")) {
+//                    buildTreeAndPrint(sExpStrBuilder);
+//                    sExpStrBuilder = new StringBuilder();
+//                    continue;
 //                }
-//            } else {
-//                System.out.println("ERROR: s-expression should start with \"(\"");
+//
+//                if (line.equals("$$")) {
+//                    buildTreeAndPrint(sExpStrBuilder);
+//                    break;
+//                }
+//
+//                line = line.trim().replaceAll("\\s+", " ");  // remove consecutive spaces
+//                line = line + " ";  // replace newline with space
+//                sExpStrBuilder.append(line);
 //            }
 //
-//            sExpressionCount++;
-//        }
+//            br.close();  //Close the input stream
 //
-//        return outputStrings;
+//        } catch (FileNotFoundException ex) {
+//            System.err.println("A FileNotFoundException was caught: " + ex.getMessage());
+//        } catch (IOException ex) {
+//            System.err.println("An IOException was caught: " + ex.getMessage());
+//        }
 //    }
+
+    void buildTreeAndPrint(StringBuilder sExpStrBuilder) {
+        sExpressionString = sExpStrBuilder.toString();
+
+        if (sExpressionString.isEmpty())
+            return;
+
+        Node sExpression = input();
+
+        if (sExpression == null)  // there exists errors
+            System.out.println(errorMsg);
+        else {
+            String output = Output.generateOutput(sExpression);
+            System.out.println(output);
+        }
+
+        errorMsg = "";
+    }
 
     private Node input() {
         String token = getToken();
@@ -190,7 +156,7 @@ class Input {
 
     private void skipToken() {
         sExpressionString = nextSExpressionString;
-//        getToken();
+        // nextSExpressionString is updated when getToken is called
     }
 
     private String getToken() {
