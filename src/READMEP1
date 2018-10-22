@@ -2,6 +2,7 @@ To compile, run:
     make
 
 To run the interpreter, run:
-    java Interpreter <input_file_name>
+    java Interpreter
 
-For example,
+Then, type in an s-expressions and finish it with a line containing a single "$".
+The last s-expression should be followed by a line containing "$$".

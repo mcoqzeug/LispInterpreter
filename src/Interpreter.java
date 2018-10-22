@@ -27,7 +27,6 @@ public class Interpreter {
                     break;
                 }
 
-                line = line.trim().replaceAll("\\s+", " ");  // remove consecutive spaces
                 line = line + " ";  // replace newline with space
                 sExpStrBuilder.append(line);
             }

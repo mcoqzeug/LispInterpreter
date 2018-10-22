@@ -16,13 +16,23 @@ class Input {
 
     void buildTreeAndPrint(StringBuilder sExpStrBuilder) {
         sExpressionString = sExpStrBuilder.toString();
+        sExpressionString = sExpressionString.trim().replaceAll("\\s+", " ");  // remove consecutive spaces
 
         if (sExpressionString.isEmpty())
             return;
 
+        if (sExpressionString.charAt(0) != '(') {
+            errorMsg = "ERROR: syntax error";
+            System.out.println(errorMsg);
+            return;
+        }
+
         Node sExpression = input();
 
-        if (sExpression == null)  // there exists errors
+        if (!sExpressionString.isEmpty()) {
+            errorMsg = "ERROR: syntax error";
+            System.out.println(errorMsg);
+        } else if (sExpression == null)  // there exists errors
             System.out.println(errorMsg);
         else {
             String output = Output.generateOutput(sExpression);
@@ -49,6 +59,11 @@ class Input {
         if (tokenType == LEFT_PARENTHESIS) {
             skipToken();  // skip "("
 
+            if (getTokenType(getToken()) == RIGHT_PARENTHESIS) {
+                skipToken();
+                return Eval.NIL;
+            }
+
             Node left = input();
 
             if (left == null)
@@ -70,7 +85,7 @@ class Input {
             token = getToken();
             nextTokenType = getTokenType(token);
             if (nextTokenType != RIGHT_PARENTHESIS) {
-                errorMsg += String.format("ERROR: unexpected %s.", token);
+                errorMsg += String.format("ERROR: unexpected %s", token);
                 return null;
             }
 
@@ -82,7 +97,7 @@ class Input {
         // In dot notation, a "(" can only be followed by
         // another "(" or an identifier. Anything else would
         // be an error.
-        errorMsg += String.format("ERROR: unexpected %s.", token);
+        errorMsg += String.format("ERROR: unexpected %s", token);
         return null;
     }
 
@@ -123,7 +138,7 @@ class Input {
             nextSExpressionString = matcher.group(2);
             return matcher.group(1);
         }
-        return "";
+        return null;
     }
 
     private int getTokenType(String token) {
@@ -160,7 +175,7 @@ class Input {
         return new Node(integer);
     }
 
-    private boolean isIdValid(String token) {
+    private static boolean isIdValid(String token) {
         char c = token.charAt(0);
 
         if (c < 'A' || c > 'Z') {
@@ -177,7 +192,7 @@ class Input {
         return true;
     }
 
-    private boolean isInteger(String str) {
+    private static boolean isInteger(String str) {
         int length = str.length();
 
         if (str.isEmpty()) {
@@ -186,7 +201,7 @@ class Input {
 
         int i = 0;
 
-        if (str.charAt(0) == '-') {
+        if (str.charAt(0) == '-' || str.charAt(0) == '+') {
             if (length == 1)
                 return false;
             i = 1;

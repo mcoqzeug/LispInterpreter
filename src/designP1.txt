@@ -1,0 +1,8 @@
+The Interpreter class reads strings from the input stream and extracts s-expressions by searching for lines that contain
+only "$" or "$$". It then pass the string to the Input class which handles building the s-expression tree and using
+the Output to print the dot notation version of the s-expression. The Eval class contains some default atoms such T,
+NIL, etc.
+
+Before calling the input routine, it checks whether the first character is "(". If it's not, there is an error. After
+the initial call of the input routine is returned, it checks whether there are characters that haven't been processed.
+If there is, there is an error [e.g. (1.2) 3 is illegal].
