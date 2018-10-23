@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -7,8 +8,16 @@ public class Interpreter {
     public static void main(String[] args) {
         Input input = new Input();
 
+        BufferedReader br;
+
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            if (args.length > 0) {  // input from file
+                FileReader fr = new FileReader(args[0]);
+                br = new BufferedReader(fr);
+            } else {  // input from stream
+                br = new BufferedReader(new InputStreamReader(System.in));
+            }
+
             StringBuilder sExpStrBuilder = new StringBuilder();
             String line;
 

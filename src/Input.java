@@ -164,10 +164,12 @@ class Input {
             return null;
         }
 
-        if (Eval.ids.containsKey(token))
-            return Eval.ids.get(token);
+        Eval eval = new Eval();
 
-        return Eval.addID(token);
+        if (eval.ids.containsKey(token))
+            return eval.ids.get(token);
+
+        return eval.addID(token);
     }
 
     private Node getInt(String token) {
