@@ -4,7 +4,6 @@ import java.util.regex.Pattern;
 class Input {
     private String sExpressionString;
     private String nextSExpressionString;
-    private String errorMsg = "";
 
     private static final int LEFT_PARENTHESIS = 0;
     private static final int RIGHT_PARENTHESIS = 1;
@@ -14,35 +13,24 @@ class Input {
 
     private static final Pattern pattern = Pattern.compile("\\s*([(.)]|[^\\s(.)]*)(.*)");
 
-    void buildTreeAndPrint(StringBuilder sExpStrBuilder) {
+    void buildTreeAndPrint(StringBuilder sExpStrBuilder) throws IllegalArgumentException {
         sExpressionString = sExpStrBuilder.toString();
         sExpressionString = sExpressionString.trim().replaceAll("\\s+", " ");  // remove consecutive spaces
 
         if (sExpressionString.isEmpty())
             return;
 
-        if (sExpressionString.charAt(0) != '(') {
-            errorMsg = "ERROR: syntax error";
-            System.out.println(errorMsg);
-            return;
-        }
-
         Node sExpression = input();
 
         if (!sExpressionString.isEmpty()) {
-            errorMsg = "ERROR: syntax error";
-            System.out.println(errorMsg);
-        } else if (sExpression == null)  // there exists errors
-            System.out.println(errorMsg);
-        else {
-            String output = Output.generateOutput(sExpression);
-            System.out.println(output);
+             throw new IllegalArgumentException("ERROR: syntax error");
         }
 
-        errorMsg = "";
+        String output = Output.generateOutput(sExpression);
+        System.out.println(output);
     }
 
-    private Node input() {
+    private Node input() throws IllegalArgumentException {
         String token = getToken();
         int tokenType = getTokenType(token);
 
@@ -66,9 +54,6 @@ class Input {
 
             Node left = input();
 
-            if (left == null)
-                return null;
-
             int nextTokenType = getTokenType(getToken());
 
             if (nextTokenType != DOT) {  // list notation
@@ -78,15 +63,11 @@ class Input {
             skipToken();  // skip dot
             Node right = input();
 
-            if (right == null)
-                return null;
-
             // the input() above should bring us to the final ")"
             token = getToken();
             nextTokenType = getTokenType(token);
             if (nextTokenType != RIGHT_PARENTHESIS) {
-                errorMsg += String.format("ERROR: unexpected %s", token);
-                return null;
+                throw new IllegalArgumentException(String.format("ERROR: unexpected %s", token));
             }
 
             skipToken();  // skip the final ")"
@@ -97,8 +78,7 @@ class Input {
         // In dot notation, a "(" can only be followed by
         // another "(" or an identifier. Anything else would
         // be an error.
-        errorMsg += String.format("ERROR: unexpected %s", token);
-        return null;
+        throw new IllegalArgumentException(String.format("ERROR: unexpected %s", token));
     }
 
     private Node inputList() {
@@ -115,15 +95,7 @@ class Input {
 
         // tokenType = INTEGER, IDENTIFIER, or LEFT_PARENTHESIS, don't skip, let input() do the skipping
         Node left = input();
-
-        if (left == null)
-            return null;
-
         Node right = inputList();
-
-        if (right == null)
-            return null;
-
         return Eval.cons(left, right);  // Would either return to this line or
     }
 
@@ -158,10 +130,9 @@ class Input {
         }
     }
 
-    private Node getId(String token) {
+    private Node getId(String token) throws IllegalArgumentException {
         if (!isIdValid(token)) {
-            errorMsg += "ERROR: invalid token";
-            return null;
+            throw new IllegalArgumentException("ERROR: invalid token");
         }
 
         Eval eval = new Eval();

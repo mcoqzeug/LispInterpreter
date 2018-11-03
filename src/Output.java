@@ -10,7 +10,7 @@ class Output {
                 return node.identifier;
             }
         } else if (node.left == null || node.right == null) {
-            return "ERROR: invalid node";
+            throw new IllegalArgumentException("ERROR: invalid node");
         }
 
         return "(" + generateOutput(node.left) + " . " + generateOutput(node.right) + ")";

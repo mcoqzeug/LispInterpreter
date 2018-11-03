@@ -25,15 +25,27 @@ public class Interpreter {
                 if (line.equals(""))
                     continue;
 
-                if (line.equals("$")) {
-                    input.buildTreeAndPrint(sExpStrBuilder);
-                    sExpStrBuilder = new StringBuilder();
-                    continue;
-                }
+                if (line.equals("$") || line.equals("$$")) {
+                    try {
+                        input.buildTreeAndPrint(sExpStrBuilder);
+                    } catch (IllegalArgumentException ex) {
+                        System.err.println(ex.getMessage());
+                    }
 
-                if (line.equals("$$")) {
-                    input.buildTreeAndPrint(sExpStrBuilder);
-                    break;
+//                    try {
+//                        Thread.sleep(5);
+//                    }
+//                    catch(InterruptedException ex) {
+//                        Thread.currentThread().interrupt();
+//                    }
+
+                    if (line.equals("$")) {
+                        sExpStrBuilder = new StringBuilder();
+                        continue;
+                    } else {
+                        break;
+                    }
+
                 }
 
                 line = line + " ";  // replace newline with space

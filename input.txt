@@ -30,4 +30,34 @@ $
     ))
 $
 (NOTSOSILLY 0 0)
+42
+$
+()
+$
+(PLUS 2 3)
+$
+(PLUS (2 . (3 . NIL)) )
+$
+(ATOM
+(QUOTE (2 .
+3))
+)
+$
+(CONS (PLUS 2 3) (MINUS 5 1))
+$
+(PLUS -2 +3)
+$
+(2 . 3]
+$
+(2 . . 3)
+$
+(2 . 3))
+$
+(CONS (PLUS 2 3) . (MINUS 5 1))
+$
+(42LIFE 3)
+$
+POLICY.INSURANCE
+$
+( 2 . (3 4) $ 5)
 $$
