@@ -1,6 +1,17 @@
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class contains all the primitive atoms and
+ * the implementation of primitive functions.It
+ * also contains functions to evaluate a lisp
+ * expression and print it using the Output class.
+ *
+ * @author  Juanxi Li
+ * @version 1.0
+ * @since   2018-10-24
+ */
+
 public class Eval {
     static final Node NIL = new Node("NIL");
     private static final Node T = new Node("T");

@@ -13,8 +13,7 @@ CLASSES = \
 		Input.java \
 		Interpreter.java \
 		Node.java \
-		Output.java \
-		Test.java
+		Output.java
 
 MAIN = Interpreter
 

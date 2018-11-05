@@ -3,6 +3,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * This class takes in strings from a file or standard input
+ * and interpret them.
+ *
+ * @author  Juanxi Li
+ * @version 1.0
+ * @since   2018-10-24
+ */
+
 public class Interpreter {
     public static void main(String[] args) {
         Input input = new Input();

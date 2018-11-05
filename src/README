@@ -6,3 +6,5 @@ To run the interpreter, run:
 
 Then, type in an s-expressions and finish it with a line containing a single "$".
 The last s-expression should be followed by a line containing "$$".
+
+Don't include COND's with all bi's evaluating to NIL, else the program will throw an error.

@@ -1,6 +1,14 @@
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class converts a string of s-expression to an instance of Node class.
+ *
+ * @author  Juanxi Li
+ * @version 1.0
+ * @since   2018-10-24
+ */
+
 class Input {
     private String sExpressionString;
     private String nextSExpressionString;
