@@ -1,9 +1,3 @@
-(EQ A B)
-$
-(EQ 1 1)
-$
-(EQ 1 2)
-$
 (CAR (QUOTE (A . B)))
 $
 (CONS 4 (QUOTE (A . B)))

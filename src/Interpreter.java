@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class Interpreter {
-
     public static void main(String[] args) {
         Input input = new Input();
-
+        Eval evaluator = new Eval();
         BufferedReader br;
 
         try {
@@ -17,43 +16,33 @@ public class Interpreter {
             } else {  // input from stream
                 br = new BufferedReader(new InputStreamReader(System.in));
             }
-
             StringBuilder sExpStrBuilder = new StringBuilder();
             String line;
 
             while ((line = br.readLine()) != null) {
-                if (line.equals(""))
-                    continue;
-
+                if (line.equals("")) continue;
                 if (line.equals("$") || line.equals("$$")) {
                     try {
-                        input.buildTreeAndPrint(sExpStrBuilder);
-                    } catch (IllegalArgumentException ex) {
-                        System.err.println(ex.getMessage());
-                    }
+                        String sExpressionString = sExpStrBuilder.toString();
+                        sExpressionString = sExpressionString
+                                .trim().replaceAll("\\s+", " ");  // remove consecutive spaces
 
-//                    try {
-//                        Thread.sleep(5);
-//                    }
-//                    catch(InterruptedException ex) {
-//                        Thread.currentThread().interrupt();
-//                    }
+                        Node sExpression = input.getNode(sExpressionString);
+                        evaluator.interpret(sExpression);
+                    } catch (IllegalArgumentException ex) {
+                        System.out.println(ex.getMessage());
+                    }
 
                     if (line.equals("$")) {
                         sExpStrBuilder = new StringBuilder();
                         continue;
-                    } else {
-                        break;
                     }
-
+                    break;
                 }
-
                 line = line + " ";  // replace newline with space
                 sExpStrBuilder.append(line);
             }
-
             br.close();
-
         } catch (IOException ex) {
             System.err.println("An IOException was caught: " + ex.getMessage());
         }

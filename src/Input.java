@@ -13,24 +13,15 @@ class Input {
 
     private static final Pattern pattern = Pattern.compile("\\s*([(.)]|[^\\s(.)]*)(.*)");
 
-    void buildTreeAndPrint(StringBuilder sExpStrBuilder) throws IllegalArgumentException {
-        sExpressionString = sExpStrBuilder.toString();
-        sExpressionString = sExpressionString.trim().replaceAll("\\s+", " ");  // remove consecutive spaces
-
-        if (sExpressionString.isEmpty())
-            return;
-
+    Node getNode(String str) {  // constructor?
+        sExpressionString = str;
+        if (sExpressionString.isEmpty()) throw new IllegalArgumentException("ERROR: illegal s-expression");
         Node sExpression = input();
-
-        if (!sExpressionString.isEmpty()) {
-             throw new IllegalArgumentException("ERROR: syntax error");
-        }
-
-        String output = Output.generateOutput(sExpression);
-        System.out.println(output);
+        if (!sExpressionString.isEmpty()) throw new IllegalArgumentException("ERROR: illegal s-expression");
+        return sExpression;
     }
 
-    private Node input() throws IllegalArgumentException {
+    private Node input() {
         String token = getToken();
         int tokenType = getTokenType(token);
 
@@ -56,9 +47,7 @@ class Input {
 
             int nextTokenType = getTokenType(getToken());
 
-            if (nextTokenType != DOT) {  // list notation
-                return Eval.cons(left, inputList());
-            }
+            if (nextTokenType != DOT) return Eval.cons(left, inputList());  // list notation
 
             skipToken();  // skip dot
             Node right = input();
@@ -66,9 +55,8 @@ class Input {
             // the input() above should bring us to the final ")"
             token = getToken();
             nextTokenType = getTokenType(token);
-            if (nextTokenType != RIGHT_PARENTHESIS) {
+            if (nextTokenType != RIGHT_PARENTHESIS)
                 throw new IllegalArgumentException(String.format("ERROR: unexpected %s", token));
-            }
 
             skipToken();  // skip the final ")"
             return Eval.cons(left, right);  // this should return to the original call of input
@@ -110,13 +98,11 @@ class Input {
             nextSExpressionString = matcher.group(2);
             return matcher.group(1);
         }
-        return null;
+        throw new IllegalArgumentException("ERROR: Cannot find token!");
     }
 
     private int getTokenType(String token) {
-        if (isInteger(token)) {
-            return INTEGER;
-        }
+        if (isInteger(token)) return INTEGER;
 
         switch (token) {
             case "(":
@@ -130,17 +116,10 @@ class Input {
         }
     }
 
-    private Node getId(String token) throws IllegalArgumentException {
-        if (!isIdValid(token)) {
-            throw new IllegalArgumentException("ERROR: invalid token");
-        }
-
-        Eval eval = new Eval();
-
-        if (eval.ids.containsKey(token))
-            return eval.ids.get(token);
-
-        return eval.addID(token);
+    private Node getId(String token) {
+        if (!isIdValid(token)) throw new IllegalArgumentException("ERROR: invalid token");
+        if (Eval.ids.containsKey(token)) return Eval.ids.get(token);
+        return Eval.addID(token);
     }
 
     private Node getInt(String token) {
@@ -151,41 +130,30 @@ class Input {
     private static boolean isIdValid(String token) {
         char c = token.charAt(0);
 
-        if (c < 'A' || c > 'Z') {
-            return false;
-        }
+        if (c < 'A' || c > 'Z') return false;
 
         for (int i=1; i<token.length(); i++) {
             c = token.charAt(i);
-            if ((c < 'A' || c > 'Z') && (c < '0' || c > '9')) {
-                return false;
-            }
+            if ((c < 'A' || c > 'Z') && (c < '0' || c > '9')) return false;
         }
-
         return true;
     }
 
     private static boolean isInteger(String str) {
-        int length = str.length();
+        if (str.isEmpty()) return false;
 
-        if (str.isEmpty()) {
-            return false;
-        }
+        int i = 0, length = str.length();
+        char c = str.charAt(0);
 
-        int i = 0;
-
-        if (str.charAt(0) == '-' || str.charAt(0) == '+') {
-            if (length == 1)
-                return false;
+        if (c == '-' || c == '+') {
+            if (length == 1) return false;
             i = 1;
         }
 
         for (; i < length; i++) {
-            char c = str.charAt(i);
-            if (c < '0' || c > '9')
-                return false;
+            c = str.charAt(i);
+            if (c < '0' || c > '9') return false;
         }
         return true;
     }
-
 }
