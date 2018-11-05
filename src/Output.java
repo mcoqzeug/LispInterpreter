@@ -8,11 +8,11 @@
 
 class Output {
     static String generateOutput(Node node) {
-        if (node.left == null && node.right == null) {  // if node.left is null then node.right should also be null
+        if (Eval.atom(node) == Eval.T) {  // if node.left is null then node.right should also be null
             if (node.identifier == null) return Integer.toString(node.integer);
             else return node.identifier;
         } else if (node.left == null || node.right == null)
-            throw new IllegalArgumentException("ERROR: invalid node");
+            throw new IllegalArgumentException("> ERROR: invalid s-expression");
         return "(" + generateOutput(node.left) + " . " + generateOutput(node.right) + ")";
     }
 }

@@ -9,3 +9,9 @@ If there is, there is an error [e.g. (1.2) 3 is illegal].
 
 The program only accept identifiers and integers with no more than 10 characters. An identifier should start with a
 upper case letter and followed by 0 or more upper case letters or digits.
+
+How to define new functions:
+(DEFUN (FUNCTION_NAME pList) Body) e.g. (DEFUN (PLUS2 A B) (PLUS A B))
+
+How to call functions:
+(FUNCTION_NAME ARGUMENT_LIST) e.g. (PLUS 1 2)

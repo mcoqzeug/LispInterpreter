@@ -23,9 +23,9 @@ class Input {
 
     Node getNode(String str) {  // constructor?
         sExpressionString = str;
-        if (sExpressionString.isEmpty()) throw new IllegalArgumentException("ERROR: illegal s-expression");
+        if (sExpressionString.isEmpty()) throw new IllegalArgumentException("> ERROR: illegal s-expression");
         Node sExpression = input();
-        if (!sExpressionString.isEmpty()) throw new IllegalArgumentException("ERROR: illegal s-expression");
+        if (!sExpressionString.isEmpty()) throw new IllegalArgumentException("> ERROR: illegal s-expression");
         return sExpression;
     }
 
@@ -64,7 +64,7 @@ class Input {
             token = getToken();
             nextTokenType = getTokenType(token);
             if (nextTokenType != RIGHT_PARENTHESIS)
-                throw new IllegalArgumentException(String.format("ERROR: unexpected %s", token));
+                throw new IllegalArgumentException(String.format("> ERROR: unexpected %s", token));
 
             skipToken();  // skip the final ")"
             return Eval.cons(left, right);  // this should return to the original call of input
@@ -74,7 +74,7 @@ class Input {
         // In dot notation, a "(" can only be followed by
         // another "(" or an identifier. Anything else would
         // be an error.
-        throw new IllegalArgumentException(String.format("ERROR: unexpected %s", token));
+        throw new IllegalArgumentException(String.format("> ERROR: unexpected %s", token));
     }
 
     private Node inputList() {
@@ -106,7 +106,7 @@ class Input {
             nextSExpressionString = matcher.group(2);
             return matcher.group(1);
         }
-        throw new IllegalArgumentException("ERROR: Cannot find token!");
+        throw new IllegalArgumentException("> ERROR: Cannot find token!");
     }
 
     private int getTokenType(String token) {
@@ -125,7 +125,7 @@ class Input {
     }
 
     private Node getId(String token) {
-        if (!isIdValid(token)) throw new IllegalArgumentException("ERROR: invalid token");
+        if (!isIdValid(token)) throw new IllegalArgumentException("> ERROR: invalid token");
         if (Eval.ids.containsKey(token)) return Eval.ids.get(token);
         return Eval.addID(token);
     }
