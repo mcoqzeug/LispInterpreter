@@ -12,7 +12,7 @@ java Interpreter
 Then, type in an s-expressions and finish it with a line containing a single `$`.
 The last s-expression should be followed by a line containing `$$`.
 
-Don't include `COND`'s with all bi's evaluating to `NIL`, else the program will throw an error.
+Don't include `COND`'s with all `bi`'s evaluating to `NIL`, else the program will throw an error.
 
 ## Design
 The Interpreter class reads strings from the input stream and extracts s-expressions by searching for lines that contain only `$` or `$$`. It then pass the string to the Input class which handles building the s-expression tree and using the Output to print the dot notation version of the s-expression. The Eval class contains some default atoms such `T`, `NIL`, etc.
